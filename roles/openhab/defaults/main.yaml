@@ -1,0 +1,3 @@
+configs_repo_path: /opt/openhab-configs
+openhab:
+  version: 2.5.8

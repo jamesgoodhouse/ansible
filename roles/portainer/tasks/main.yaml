@@ -1,0 +1,15 @@
+- name: start Docker container
+  docker_container:
+    name: portainer-ce
+    image: portainer/portainer-ce:{{ portainer.version }}
+    cleanup: true
+    detach: true
+    devices: []
+    published_ports:
+    - 9000:9000
+    pull: true
+    restart_policy: always
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - /opt/portainer:/data
+  tags: portainer

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+set -euo pipefail
+
+function build_configs {
+  echo building openhab configs
+  /usr/bin/docker run --rm \
+                      --name openhab-configs-builder \
+                      -v {{ configs_repo_path }}:/configs_repo \
+                      -v /opt/openhab/conf:/conf \
+                      hairyhenderson/gomplate --input-dir='/configs_repo/configs' \
+                                              --output-map='/conf/{{ '{{' }} .in | strings.ReplaceAll ".tmpl" " " {{ '}}' }}' \
+                                              --exclude='*.yaml' \
+                                              --datasource='configs=/configs_repo/configs/configs.yaml' \
+                                              --datasource='secrets=/configs_repo/configs/secrets.yaml'
+}
+
+function configs_up_to_date {
+  /usr/bin/docker run --rm -v {{ configs_repo_path }}:/git jgoodhouse/git:latest fetch
+
+  head_hash=$(/usr/bin/docker run --rm -v {{ configs_repo_path }}:/git jgoodhouse/git:latest rev-parse HEAD)
+  upstream_hash=$(/usr/bin/docker run --rm -v {{ configs_repo_path }}:/git jgoodhouse/git:latest rev-parse master@{upstream})
+
+  if [ "$head_hash" != "$upstream_hash" ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+if [ ! -f {{ configs_repo_path }}/.initialized ]; then
+  echo completing initial config build
+  build_configs
+  touch {{ configs_repo_path }}/.initialized
+fi
+
+if ! configs_up_to_date; then
+  echo pulling openhab configs
+  /usr/bin/docker run --rm --name openhab-configs-git-pull -v {{ configs_repo_path }}:/git jgoodhouse/git:latest pull
+
+  build_configs
+else
+  echo openhab configs up-to-date
+fi

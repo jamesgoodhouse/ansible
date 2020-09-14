@@ -1,0 +1,13 @@
+ssh:
+  allow_agent_forwarding: 'no'
+  allow_tcp_forwarding: 'no'
+  challenge_response_authentication: 'no'
+  client_alive_count_max: 2
+  compression: delayed
+  max_auth_tries: 6
+  max_sessions: 2
+  password_authentication: 'no'
+  permit_root_login: 'no'
+  tcp_keep_alive: 'no'
+  use_pam: 'no'
+  x11_forwarding: 'no'

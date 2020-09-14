@@ -1,0 +1,63 @@
+- name: check if configs cloned
+  stat:
+    path: '{{ configs_repo_path }}/.git'
+  register: configs_cloned
+  tags: openhab
+
+- name: clone configs repo
+  docker_container:
+    name: git
+    image: jgoodhouse/git:latest
+    command: clone https://github.com/jamesgoodhouse/openhab-configs.git --depth=1 /git
+    cleanup: true
+    detach: false
+    pull: true
+    restart_policy: 'no'
+    volumes:
+    - '{{ configs_repo_path }}:/git'
+  when: not configs_cloned.stat.exists
+  tags: openhab
+
+- name: add openhab configs builder script
+  template:
+    src: build-openhab-configs.j2
+    dest: /usr/local/bin/build-openhab-configs
+    mode: 0744
+  tags: openhab
+
+- name: setup openhab configs builder cron job
+  cron:
+    name: build openhab configs
+    minute: '*'
+    hour: '*'
+    day: '*'
+    month: '*'
+    weekday: '*'
+    job: /usr/local/bin/build-openhab-configs
+  tags: openhab
+
+- name: start Docker container
+  docker_container:
+    name: openhab
+    image: openhab/openhab:{{ openhab.version }}
+    detach: true
+    devices:
+    - /dev/ttyUSB0
+    published_ports:
+    - 8080:8080
+    - 8101:8101 # console
+    - 5007:5007 # language server protocol
+    pull: true
+    state: started
+    restart_policy: always
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/timezone:/etc/timezone:ro
+    - /opt/openhab/addons:/openhab/addons
+    - /opt/openhab/conf:/openhab/conf
+    - /opt/openhab/userdata:/openhab/userdata
+    env:
+      EXTRA_JAVA_OPTS="-Duser.timezone=Pacific/US"
+  tags: openhab
+
+# - name: add watchman systemd unit file

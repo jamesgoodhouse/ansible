@@ -1,0 +1,76 @@
+---
+- name: update apt package index
+  apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+    force_apt_get: yes
+  tags:
+  - apt
+  - docker
+
+- name: install dependencies
+  apt:
+    pkg:
+    - ca-certificates
+    - python3-pip
+    - python3-pkg-resources
+  tags:
+  - apt
+  - docker
+
+- name: add official GPG key to apt
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+  tags:
+  - apt
+  - docker
+
+- name: add apt repository
+  apt_repository:
+    repo: "deb [arch={{ item.value }}] https://download.docker.com/linux/debian {{ ansible_facts.distribution_release }} stable"
+    state: present
+  vars:
+    repo_arch:
+      armv7l: armhf
+      x86_64: amd64
+  loop: "{{ lookup('dict', repo_arch) }}"
+  when: "ansible_facts['architecture'] in item.key"
+  tags:
+  - apt
+  - docker
+
+- name: update apt package index
+  apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+    force_apt_get: yes
+  tags:
+  - apt
+  - docker
+
+- name: install Docker
+  apt:
+    pkg:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+  tags: docker
+
+- name: add users to docker group
+  user:
+    name: '{{ item }}'
+    groups: docker
+    append: yes
+  with_items: '{{ docker_users }}'
+  tags: docker
+
+- name: install Docker SDK for Python
+  pip:
+    name: docker
+  tags:
+  - docker
+  - pip
+  - python

@@ -7,4 +7,6 @@
   - common
   - docker
   - portainer
+  - influxdb
+  - grafana
   - openhab

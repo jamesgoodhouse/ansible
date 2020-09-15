@@ -4,7 +4,6 @@
     image: portainer/portainer-ce:{{ portainer.version }}
     cleanup: true
     detach: true
-    devices: []
     published_ports:
     - 9000:9000
     pull: true

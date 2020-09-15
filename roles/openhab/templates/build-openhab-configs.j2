@@ -11,6 +11,7 @@ function build_configs {
                       hairyhenderson/gomplate --input-dir='/configs_repo/configs' \
                                               --output-map='/conf/{{ '{{' }} .in | strings.ReplaceAll ".tmpl" " " {{ '}}' }}' \
                                               --exclude='*.yaml' \
+                                              --exclude='.gitignore' \
                                               --datasource='configs=/configs_repo/configs/configs.yaml' \
                                               --datasource='secrets=/configs_repo/configs/secrets.yaml'
 }

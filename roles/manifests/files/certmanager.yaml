@@ -23,6 +23,8 @@ spec:
   chart: cert-manager-webhook-namecheap
   repo: https://jamesgoodhouse.github.io/cert-manager-webhook-namecheap
   version: 0.1.0
+  valuesContent: |-
+    priorityClassName: system-cluster-critical
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

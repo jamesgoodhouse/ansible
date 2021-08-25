@@ -8,6 +8,8 @@ spec:
   repo: https://charts.jetstack.io
   version: v1.5.3
   valuesContent: |-
+    global:
+      priorityClassName: system-cluster-critical
     installCRDs: true
     prometheus:
       enabled: false

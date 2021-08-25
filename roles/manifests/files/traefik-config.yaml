@@ -6,20 +6,10 @@ metadata:
 spec:
   valuesContent: |-
     additionalArguments:
-    - --certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=0
-    - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=namecheap
-    - --certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=156.154.132.200,156.154.133.200
-    - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
-    - --certificatesresolvers.letsencrypt.acme.email=admin@goodhouse.io
-    - --certificatesresolvers.letsencrypt.acme.storage=/data/acme.json
     - --entrypoints.web.http.redirections.entrypoint.scheme=https
     - --entrypoints.web.http.redirections.entrypoint.to=:443
-    - --entrypoints.websecure.http.tls.certResolver=letsencrypt
     - --log.level=DEBUG
     - --serversTransport.insecureSkipVerify=true
-    envFrom:
-    - secretRef:
-        name: namecheap-auth
     persistence:
       enabled: true
       storageClassName: local-path
@@ -86,6 +76,19 @@ spec:
     secret: basicauth-traefik
     removeHeader: true
 ---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: traefik.k8s.home.goodhouse.io
+  namespace: kube-system
+spec:
+  dnsNames:
+  - traefik.k8s.home.goodhouse.io
+  secretName: traefik.k8s.home.goodhouse.io
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
@@ -104,4 +107,4 @@ spec:
     - name: basicauth-traefik
       namespace: kube-system
   tls:
-    certResolver: letsencrypt
+    secretName: traefik.k8s.home.goodhouse.io

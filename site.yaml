@@ -12,8 +12,7 @@
     k3s_start_on_boot: true
     k3s_state: installed
     k3s_server:
-      disable:
-      - traefik
+      default-local-storage-path: /opt/k8s
   roles:
    - role: xanmanning.k3s
    - role: manifests

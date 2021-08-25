@@ -89,7 +89,7 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: traefik-dashboard
+  name: traefik-dashboard-external
   namespace: kube-system
 spec:
   entryPoints:
@@ -102,6 +102,6 @@ spec:
       kind: TraefikService
     middlewares:
     - name: basicauth-traefik
-      namespace: traefik
+      namespace: kube-system
   tls:
     certResolver: letsencrypt

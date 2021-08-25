@@ -34,7 +34,7 @@ PermitRootLogin {{ ssh.permit_root_login }}
 MaxAuthTries {{ ssh.max_auth_tries }}
 MaxSessions {{ ssh.max_sessions }}
 
-#PubkeyAuthentication yes
+PubkeyAuthentication {{ ssh.pubkey_authentication }}
 
 # Expect .ssh/authorized_keys2 to be disregarded by default in future.
 #AuthorizedKeysFile	.ssh/authorized_keys .ssh/authorized_keys2

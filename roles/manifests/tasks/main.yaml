@@ -1,0 +1,10 @@
+---
+- name: Copy K8S manifests to /var/lib/rancher/k3s/server/manifests
+  copy:
+    src: files/
+    dest: /var/lib/rancher/k3s/server/manifests
+    owner: root
+    group: root
+    mode: '0600'
+  tags:
+  - manifests

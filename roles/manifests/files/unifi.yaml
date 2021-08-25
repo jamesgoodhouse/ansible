@@ -1,0 +1,39 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ubiquiti
+  labels:
+    name: ubiquiti
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: unifi
+  namespace: ubiquiti
+spec:
+  chart: unifi
+  repo: https://jamesgoodhouse.github.io/helm-charts
+  version: 0.1.20
+  valuesContent: |-
+    ingressroute:
+      enabled: true
+      host: unifi.home.goodhouse.io
+      tls:
+        passthrough: true
+        secretName: unifi.home.goodhouse.io
+    rsync_backup:
+      enabled: true
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: unifi.home.goodhouse.io
+  namespace: ubiquiti
+spec:
+  dnsNames:
+  - unifi.home.goodhouse.io
+  secretName: unifi.home.goodhouse.io
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer

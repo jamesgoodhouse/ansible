@@ -11,3 +11,13 @@ spec:
     installCRDs: true
     prometheus:
       enabled: false
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: cert-manager-webhook-namecheap
+  namespace: kube-system
+spec:
+  chart: cert-manager-webhook-namecheap
+  repo: https://jamesgoodhouse.github.io/cert-manager-webhook-namecheap
+  version: 0.1.0

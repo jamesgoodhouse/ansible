@@ -2,13 +2,13 @@
   community.kubernetes.k8s:
     api_version: v1
     kind: Namespace
-    name: "{{ namespace }}"
-    state: present
+    name: "{{ mosquitto_namespace }}"
+    state: "{{ mosquitto_state }}"
 
 - name: Deploy ConfigMap
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ mosquitto_state }}"
+    namespace: "{{ mosquitto_namespace }}"
     resource_definition:
       apiVersion: v1
       kind: ConfigMap
@@ -48,8 +48,8 @@
 
 - name: Deploy Secret
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ mosquitto_state }}"
+    namespace: "{{ mosquitto_namespace }}"
     resource_definition:
       apiVersion: v1
       kind: Secret
@@ -57,12 +57,12 @@
         name: mosquitto-passwd
       type: Opaque
       data:
-        passwd: "{{ passwd | b64encode }}"
+        passwd: "{{ mosquitto_passwd | b64encode }}"
 
 - name: Deploy PersistentVolumeClaim
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ mosquitto_state }}"
+    namespace: "{{ mosquitto_namespace }}"
     resource_definition:
       apiVersion: v1
       kind: PersistentVolumeClaim
@@ -78,8 +78,8 @@
 
 - name: Deploy Deployment
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ mosquitto_state }}"
+    namespace: "{{ mosquitto_namespace }}"
     resource_definition:
       apiVersion: apps/v1
       kind: Deployment
@@ -125,10 +125,27 @@
               - name: passwd
                 mountPath: /etc/mosquitto
 
+- name: Deploy Certificate
+  community.kubernetes.k8s:
+    state: "{{ mosquitto_state }}"
+    namespace: "{{ mosquitto_namespace }}"
+    resource_definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: "{{ mosquitto_host }}"
+      spec:
+        dnsNames:
+        - "{{ mosquitto_host }}"
+        secretName: "{{ mosquitto_host }}"
+        issuerRef:
+          name: letsencrypt
+          kind: ClusterIssuer
+
 - name: Deploy IngressRouteTCP (secure)
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ mosquitto_state }}"
+    namespace: "{{ mosquitto_namespace }}"
     resource_definition:
       apiVersion: traefik.containo.us/v1alpha1
       kind: IngressRouteTCP
@@ -143,15 +160,15 @@
           services:
           - kind: Service
             name: mosquitto
-            namespace: data
+            namespace: mosquitto
             port: 1883
         tls:
-          certResolver: letsencrypt
+          secretName: mqtt.home.goodhouse.io
 
 - name: Deploy IngressRouteTCP
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ mosquitto_state }}"
+    namespace: "{{ mosquitto_namespace }}"
     resource_definition:
       apiVersion: traefik.containo.us/v1alpha1
       kind: IngressRouteTCP
@@ -171,8 +188,8 @@
 
 - name: Deploy Service
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ mosquitto_state }}"
+    namespace: "{{ mosquitto_namespace }}"
     resource_definition:
       apiVersion: v1
       kind: Service

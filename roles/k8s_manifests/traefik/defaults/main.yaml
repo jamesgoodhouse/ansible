@@ -1,1 +1,2 @@
-namespace: kube-system
+traefik_namespace: kube-system
+traefik_state: present

@@ -1,1 +1,2 @@
-namespace: mosquitto
+mosquitto_namespace: mosquitto
+mosquitto_state: present

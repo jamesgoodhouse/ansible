@@ -1,7 +1,7 @@
 - name: Deploy Deployment
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ fireplacectl_state }}"
+    namespace: "{{ fireplacectl_namespace }}"
     resource_definition:
       apiVersion: apps/v1
       kind: Deployment

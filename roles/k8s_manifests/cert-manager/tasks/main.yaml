@@ -2,13 +2,14 @@
   community.kubernetes.k8s:
     api_version: v1
     kind: Namespace
-    name: "{{ namespace }}"
-    state: present
+    name: "{{ cert_manager_namespace }}"
+    state: "{{ cert_manager_state }}"
 
 - name: Deploy Helm chart
+  register: helm_chart
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ cert_manager_state }}"
+    namespace: "{{ cert_manager_namespace }}"
     resource_definition:
       apiVersion: helm.cattle.io/v1
       kind: HelmChart
@@ -25,10 +26,21 @@
           prometheus:
             enabled: false
 
+# - name: Wait for Helm chart to be deployed
+#   community.kubernetes.k8s_info:
+#     name: "{{ helm_chart.result.status.jobName }}"
+#     namespace: "{{ cert_manager_namespace }}"
+#     kind: Job
+#     wait: true
+#     wait_condition:
+#       type: Complete
+#       status: "True"
+#   when: cert_manager_state == 'present' and helm_chart.changed
+
 - name: Deploy cert-manager-webhook-namecheap Helm chart
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ cert_manager_state }}"
+    namespace: "{{ cert_manager_namespace }}"
     resource_definition:
       apiVersion: helm.cattle.io/v1
       kind: HelmChart
@@ -43,14 +55,14 @@
 
 - name: Deploy ClusterRole for webhooks
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ cert_manager_state }}"
+    namespace: "{{ cert_manager_namespace }}"
     resource_definition:
       apiVersion: rbac.authorization.k8s.io/v1
       kind: ClusterRole
       metadata:
         name: cert-manager-webhook:extensions
-        namespace: "{{ namespace }}"
+        namespace: "{{ cert_manager_namespace }}"
         labels:
           app: webhook
       rules:
@@ -63,14 +75,14 @@
 
 - name: Deploy ClusterRoleBinding for webhooks
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ cert_manager_state }}"
+    namespace: "{{ cert_manager_namespace }}"
     resource_definition:
       apiVersion: rbac.authorization.k8s.io/v1
       kind: ClusterRoleBinding
       metadata:
         name: cert-manager-webhook:extensions
-        namespace: "{{ namespace }}"
+        namespace: "{{ cert_manager_namespace }}"
         labels:
           app: webhook
       roleRef:
@@ -81,12 +93,12 @@
       - apiGroup: ""
         kind: ServiceAccount
         name: cert-manager
-        namespace: "{{ namespace }}"
+        namespace: "{{ cert_manager_namespace }}"
 
 - name: Deploy Secret for Namecheap credentials
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ cert_manager_state }}"
+    namespace: "{{ cert_manager_namespace }}"
     resource_definition:
       apiVersion: v1
       kind: Secret
@@ -94,13 +106,13 @@
         name: namecheap-credentials
       type: Opaque
       data:
-        apiKey: "{{ namecheap_api_key | b64encode }}"
-        apiUser: "{{ namecheap_api_user | b64encode }}"
+        apiKey: "{{ cert_manager_webhook_namecheap_api_key | b64encode }}"
+        apiUser: "{{ cert_manager_webhook_namecheap_api_user | b64encode }}"
 
 - name: Deploy ClusterIssuer for Let's Encrypt
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ cert_manager_state }}"
+    namespace: "{{ cert_manager_namespace }}"
     resource_definition:
       apiVersion: cert-manager.io/v1
       kind: ClusterIssuer

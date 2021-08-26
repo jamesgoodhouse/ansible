@@ -1,7 +1,7 @@
 - name: Deploy HelmChartConfig
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ traefik_state }}"
+    namespace: "{{ traefik_namespace }}"
     resource_definition:
       apiVersion: helm.cattle.io/v1
       kind: HelmChartConfig
@@ -75,8 +75,8 @@
 
 - name: Deploy Middleware for basic auth
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ traefik_state }}"
+    namespace: "{{ traefik_namespace }}"
     resource_definition:
       apiVersion: traefik.containo.us/v1alpha1
       kind: Middleware
@@ -89,25 +89,25 @@
 
 - name: Deploy Certificate for dashboard
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ traefik_state }}"
+    namespace: "{{ traefik_namespace }}"
     resource_definition:
       apiVersion: cert-manager.io/v1
       kind: Certificate
       metadata:
-        name: "{{ dashboard_host }}"
+        name: "{{ traefik_dashboard_host }}"
       spec:
         dnsNames:
-        - "{{ dashboard_host }}"
-        secretName: "{{ dashboard_host }}"
+        - "{{ traefik_dashboard_host }}"
+        secretName: "{{ traefik_dashboard_host }}"
         issuerRef:
           name: letsencrypt
           kind: ClusterIssuer
 
 - name: Deploy IngressRoute for dashboard
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ traefik_state }}"
+    namespace: "{{ traefik_namespace }}"
     resource_definition:
       apiVersion: traefik.containo.us/v1alpha1
       kind: IngressRoute
@@ -117,21 +117,21 @@
         entryPoints:
         - websecure
         routes:
-        - match: "Host(`{{ dashboard_host }}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+        - match: "Host(`{{ traefik_dashboard_host }}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
           kind: Rule
           services:
           - name: api@internal
             kind: TraefikService
           middlewares:
           - name: basicauth-traefik
-            namespace: "{{ namespace }}"
+            namespace: "{{ traefik_namespace }}"
         tls:
-          secretName: "{{ dashboard_host }}"
+          secretName: "{{ traefik_dashboard_host }}"
 
 - name: Deploy Secret for basic auth
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ traefik_state }}"
+    namespace: "{{ traefik_namespace }}"
     resource_definition:
       apiVersion: v1
       kind: Secret
@@ -139,4 +139,4 @@
         name: basicauth-traefik
       type: Opaque
       data:
-        users: "{{ users | b64encode }}"
+        users: "{{ traefik_users | b64encode }}"

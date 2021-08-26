@@ -2,13 +2,13 @@
   community.kubernetes.k8s:
     api_version: v1
     kind: Namespace
-    name: "{{ namespace }}"
-    state: present
+    name: "{{ openhab_namespace }}"
+    state: "{{ openhab_state }}"
 
 - name: Deploy Helm chart
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ openhab_state }}"
+    namespace: "{{ openhab_namespace }}"
     resource_definition:
       apiVersion: helm.cattle.io/v1
       kind: HelmChart
@@ -210,8 +210,8 @@
 
 - name: Deploy Certificate
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ openhab_state }}"
+    namespace: "{{ openhab_namespace }}"
     resource_definition:
       apiVersion: cert-manager.io/v1
       kind: Certificate
@@ -227,8 +227,8 @@
 
 - name: Deploy Secret
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ openhab_state }}"
+    namespace: "{{ openhab_namespace }}"
     resource_definition:
       apiVersion: v1
       kind: Secret

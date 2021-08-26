@@ -2,13 +2,13 @@
   community.kubernetes.k8s:
     api_version: v1
     kind: Namespace
-    name: "{{ namespace }}"
-    state: present
+    name: "{{ ubiquiti_namespace }}"
+    state: "{{ ubiquiti_state }}"
 
 - name: Deploy Helm chart
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ ubiquiti_state }}"
+    namespace: "{{ ubiquiti_namespace }}"
     resource_definition:
       apiVersion: helm.cattle.io/v1
       kind: HelmChart
@@ -21,27 +21,27 @@
         valuesContent: |-
           ingressroute:
             enabled: true
-            host: "{{ gui_host }}"
+            host: "{{ ubiquiti_gui_host }}"
             tls:
               passthrough: true
-              secretName: "{{ gui_host }}"
+              secretName: "{{ ubiquiti_gui_host }}"
           rsync_backup:
             enabled: true
 
 - name: Deploy Certificate
   community.kubernetes.k8s:
-    state: present
-    namespace: "{{ namespace }}"
+    state: "{{ ubiquiti_state }}"
+    namespace: "{{ ubiquiti_namespace }}"
     resource_definition:
       apiVersion: cert-manager.io/v1
       kind: Certificate
       metadata:
-        name: "{{ gui_host }}"
+        name: "{{ ubiquiti_gui_host }}"
         namespace: ubiquiti
       spec:
         dnsNames:
-        - "{{ gui_host }}"
-        secretName: "{{ gui_host }}"
+        - "{{ ubiquiti_gui_host }}"
+        secretName: "{{ ubiquiti_gui_host }}"
         issuerRef:
           name: letsencrypt
           kind: ClusterIssuer

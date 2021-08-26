@@ -1,1 +1,2 @@
-namespace: ubiquiti
+ubiquiti_namespace: ubiquiti
+ubiquiti_state: present

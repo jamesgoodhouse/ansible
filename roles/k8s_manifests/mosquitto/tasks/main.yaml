@@ -1,0 +1,187 @@
+- name: Create Namespace
+  community.kubernetes.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ namespace }}"
+    state: present
+
+- name: Deploy ConfigMap
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: mosquitto-conf
+      data:
+        mosquitto.conf: |
+          acl_file /mosquitto/config/acl
+          allow_anonymous false
+          listener 1883
+          log_type debug
+          password_file /etc/mosquitto/passwd
+          persistence true
+          persistence_location /mosquitto/data/
+          user mosquitto
+        acl: |
+          topic read $SYS/#
+
+          user admin
+          topic #
+
+          user konnected
+          topic konnected/#
+
+          user openhab
+          topic write rpi/fireplace/power
+          topic read rpi/fireplace/status
+          topic read rpi/fireplace/state
+          topic read konnected/#
+          topic read sensor_reporter/#
+
+          user rpi
+          topic rpi/#
+
+          user sensor_reporter
+          topic sensor_reporter/#
+
+- name: Deploy Secret
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: mosquitto-passwd
+      type: Opaque
+      data:
+        passwd: "{{ passwd | b64encode }}"
+
+- name: Deploy PersistentVolumeClaim
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: mosquitto
+      spec:
+        storageClassName: local-path
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100M
+
+- name: Deploy Deployment
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: mosquitto
+        labels:
+          app: mosquitto
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: mosquitto
+        template:
+          metadata:
+            labels:
+              app: mosquitto
+          spec:
+            securityContext:
+              runAsUser: 1883
+              runAsGroup: 1883
+            volumes:
+            - name: mosquitto
+              persistentVolumeClaim:
+                claimName: mosquitto
+            - name: conf
+              configMap:
+                name: mosquitto-conf
+            - name: passwd
+              secret:
+                secretName: mosquitto-passwd
+
+            containers:
+            - name: mosquitto
+              image: eclipse-mosquitto:2.0
+              ports:
+              - containerPort: 1883
+              volumeMounts:
+              - name: mosquitto
+                mountPath: /mosquitto/data
+                subPath: data
+              - name: conf
+                mountPath: /mosquitto/config
+              - name: passwd
+                mountPath: /etc/mosquitto
+
+- name: Deploy IngressRouteTCP (secure)
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: traefik.containo.us/v1alpha1
+      kind: IngressRouteTCP
+      metadata:
+        name: mosquitto-secure
+      spec:
+        entryPoints:
+        - mqtt-secure
+        routes:
+        - kind: Rule
+          match: HostSNI(`*`)
+          services:
+          - kind: Service
+            name: mosquitto
+            namespace: data
+            port: 1883
+        tls:
+          certResolver: letsencrypt
+
+- name: Deploy IngressRouteTCP
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: traefik.containo.us/v1alpha1
+      kind: IngressRouteTCP
+      metadata:
+        name: mosquitto
+      spec:
+        entryPoints:
+        - mqtt
+        routes:
+        - kind: Rule
+          match: HostSNI(`*`)
+          services:
+          - kind: Service
+            name: mosquitto
+            namespace: data
+            port: 1883
+
+- name: Deploy Service
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: mosquitto
+      spec:
+        selector:
+          app: mosquitto
+        ports:
+        - name: unencrypted
+          port: 1883
+          protocol: TCP

@@ -19,7 +19,7 @@
         default-local-storage-path: /opt/k8s
     tags:
     - k3s
-  - role: cert-manager
+  - role: deployments/cert-manager
     vars:
       namecheap_api_key: !vault |
         $ANSIBLE_VAULT;1.1;AES256
@@ -39,7 +39,7 @@
     tags:
     - cert-manager
     - k8s
-  - role: traefik
+  - role: deployments/traefik
     vars:
       dashboard_host: traefik.k8s.home.goodhouse.io
       users: !vault |
@@ -53,11 +53,11 @@
     tags:
     - traefik
     - k8s
-  - role: openhab
+  - role: deployments/openhab
     tags:
     - openhab
     - k8s
-  - role: ubiquiti
+  - role: deployments/ubiquiti
     vars:
       gui_host: unifi.home.goodhouse.io
     tags:

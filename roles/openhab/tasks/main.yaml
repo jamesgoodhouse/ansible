@@ -1,5 +1,3 @@
-- debug: msg="{{ environment }}"
-
 - name: Create Namespace
   community.kubernetes.k8s:
     api_version: v1

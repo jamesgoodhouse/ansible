@@ -1,0 +1,125 @@
+- name: Create Namespace
+  community.kubernetes.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ namespace }}"
+    state: present
+
+- name: Deploy Helm chart
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: helm.cattle.io/v1
+      kind: HelmChart
+      metadata:
+        name: cert-manager
+      spec:
+        chart: cert-manager
+        repo: https://charts.jetstack.io
+        version: v1.5.3
+        valuesContent: |-
+          global:
+            priorityClassName: system-cluster-critical
+          installCRDs: true
+          prometheus:
+            enabled: false
+
+- name: Deploy cert-manager-webhook-namecheap Helm chart
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: helm.cattle.io/v1
+      kind: HelmChart
+      metadata:
+        name: cert-manager-webhook-namecheap
+      spec:
+        chart: cert-manager-webhook-namecheap
+        repo: https://jamesgoodhouse.github.io/cert-manager-webhook-namecheap
+        version: 0.1.0
+        valuesContent: |-
+          priorityClassName: system-cluster-critical
+
+- name: Deploy ClusterRole for webhooks
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRole
+      metadata:
+        name: cert-manager-webhook:extensions
+        namespace: "{{ namespace }}"
+        labels:
+          app: webhook
+      rules:
+        - apiGroups:
+          - acme.namecheap.com
+          resources:
+          - '*'
+          verbs:
+          - 'create'
+
+- name: Deploy ClusterRoleBinding for webhooks
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: cert-manager-webhook:extensions
+        namespace: "{{ namespace }}"
+        labels:
+          app: webhook
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: cert-manager-webhook:extensions
+      subjects:
+      - apiGroup: ""
+        kind: ServiceAccount
+        name: cert-manager
+        namespace: "{{ namespace }}"
+
+- name: Deploy Secret for Namecheap credentials
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: namecheap-credentials
+      type: Opaque
+      data:
+        apiKey: "{{ namecheap_api_key | b64encode }}"
+        apiUser: "{{ namecheap_api_user | b64encode }}"
+
+- name: Deploy ClusterIssuer for Let's Encrypt
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: cert-manager.io/v1
+      kind: ClusterIssuer
+      metadata:
+        name: letsencrypt
+      spec:
+        acme:
+          server: https://acme-v02.api.letsencrypt.org/directory
+          privateKeySecretRef:
+            name: letsencrypt-account-key
+          solvers:
+          - dns01:
+              webhook:
+                groupName: acme.namecheap.com
+                solverName: namecheap
+                config:
+                  apiKeySecretRef:
+                    key: apiKey
+                    name: namecheap-credentials
+                  apiUserSecretRef:
+                    key: apiUser
+                    name: namecheap-credentials

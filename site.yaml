@@ -5,14 +5,54 @@
   - role: rpi
 
 - hosts: k3s_nodes
-  vars:
-    k3s_become_for_all: true
-    k3s_build_cluster: false
-    k3s_release_version: stable
-    k3s_start_on_boot: true
-    k3s_state: installed
-    k3s_server:
-      default-local-storage-path: /opt/k8s
+  environment:
+    K8S_AUTH_KUBECONFIG: /etc/rancher/k3s/k3s.yaml
   roles:
-   - role: xanmanning.k3s
-   - role: manifests
+  - role: xanmanning.k3s
+    vars:
+      k3s_become_for_all: true
+      k3s_build_cluster: false
+      k3s_release_version: stable
+      k3s_start_on_boot: true
+      k3s_state: installed
+      k3s_server:
+        default-local-storage-path: /opt/k8s
+    tags:
+    - k3s
+  - role: cert-manager
+    vars:
+      namecheap_api_key: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        63343030346133343337343063346630656238323563343465656631326339346335366239353733
+        6165666264343661613966353631303635323565386535640a376465336239646333326430623461
+        37393036633363353530376437383232333039316134666634316661636266623934303731323364
+        6664613139633636380a643438666365356262613435386137636338666234643936303761336231
+        33323265366339373635663362353966616163336539393136363065396536333364653661323436
+        3433366564643938363362306433653337656632623933353561
+      namecheap_api_user: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        37353038303534613832323666353939393532656334373930333365393266346333623134323733
+        3236393362363333386534383362633732343864316435370a646130373464613931353632653366
+        35633561333131613566356333303532396331303432656238646130613966396166626234653062
+        6165323835353061370a626633356532626334303135306363656131633632633339336664336433
+        3762
+    tags:
+    - cert-manager
+    - k8s
+  - role: traefik
+    vars:
+      dashboard_host: traefik.k8s.home.goodhouse.io
+    tags:
+    - traefik
+    - k8s
+  - role: openhab
+    tags:
+    - openhab
+    - k8s
+  - role: ubiquiti
+    vars:
+      gui_host: unifi.home.goodhouse.io
+    tags:
+    - ubiquiti
+    - unifi
+    - k8s

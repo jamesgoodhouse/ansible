@@ -1,11 +1,8 @@
 [rpi]
 rpi-1.home.goodhouse.io
 
-[py3_hosts:children]
-rpi
-
 [k3s_nodes:children]
 rpi
 
-[py3_hosts:vars]
+[rpi:vars]
 ansible_python_interpreter=/usr/bin/python3

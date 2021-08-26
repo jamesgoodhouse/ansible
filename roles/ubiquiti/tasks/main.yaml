@@ -1,0 +1,47 @@
+- name: Create Namespace
+  community.kubernetes.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ namespace }}"
+    state: present
+
+- name: Deploy Helm chart
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: helm.cattle.io/v1
+      kind: HelmChart
+      metadata:
+        name: unifi
+      spec:
+        chart: unifi
+        repo: https://jamesgoodhouse.github.io/helm-charts
+        version: 0.1.20
+        valuesContent: |-
+          ingressroute:
+            enabled: true
+            host: "{{ gui_host }}"
+            tls:
+              passthrough: true
+              secretName: "{{ gui_host }}"
+          rsync_backup:
+            enabled: true
+
+- name: Deploy Certificate
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: "{{ gui_host }}"
+        namespace: ubiquiti
+      spec:
+        dnsNames:
+        - "{{ gui_host }}"
+        secretName: "{{ gui_host }}"
+        issuerRef:
+          name: letsencrypt
+          kind: ClusterIssuer

@@ -1,0 +1,241 @@
+- debug: msg="{{ environment }}"
+
+- name: Create Namespace
+  community.kubernetes.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ namespace }}"
+    state: present
+
+- name: Deploy Helm chart
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: helm.cattle.io/v1
+      kind: HelmChart
+      metadata:
+        name: openhab
+      spec:
+        chart: openhab
+        repo: https://jamesgoodhouse.github.io/helm-charts
+        version: 0.1.0
+        valuesContent: |-
+          ingressroute:
+            enabled: true
+            host: openhab.home.goodhouse.io
+            tls:
+              secretName: openhab.home.goodhouse.io
+
+          securityContext:
+            privileged: true # to allow bluetooth and zstick access, might be able to be scoped down some
+
+          server:
+            settings:
+              extraJavaOpts: "-Duser.timezone=America/Los_Angeles -Dgnu.io.rxtx.SerialPorts=/dev/ttyUSB0:/dev/ttyUSB1"
+              cryptoPolicy: unlimited
+
+          extraEnvironmentVars:
+            # EXTRA_JAVA_OPTS: "-Duser.timezone=America/Los_Angeles -Dgnu.io.rxtx.SerialPorts=/dev/ttyUSB0:/dev/ttyUSB1"
+            TZ: America/Los_Angeles
+            # CRYPTO_POLICY: unlimited
+            # OPENHAB_HTTP_PORT: "8081"
+            # DBUS_SYSTEM_BUS_ADDRESS: "unix:path=/run/dbus/system_bus_socket"
+
+          # to allow bluetooth access
+          # hostNetwork: true
+          # dnsPolicy: ClusterFirstWithHostNet
+
+          initContainers:
+          - name: init-openhab
+            image: busybox:latest
+            imagePullPolicy: Always
+            command:
+            - sh
+            - -c
+            - |
+              while [ ! $(ls /final_configs | wc -l) -gt 0 ]; do
+                echo 'no configs found; waiting 5s'
+                sleep 5
+              done
+              echo 'configs found; starting'
+            volumeMounts:
+            - name: openhab
+              mountPath: /final_configs
+              subPath: conf
+              readOnly: true
+
+          volumeMounts:
+          - name: zstick-zwave
+            mountPath: /dev/ttyUSB0
+          - name: zstick-zigbee
+            mountPath: /dev/ttyUSB1
+          - name: openhab
+            mountPath: /openhab/conf
+            subPath: conf
+          - name: openhab
+            mountPath: /openhab/addons
+            subPath: addons
+          - name: openhab
+            mountPath: /openhab/userdata
+            subPath: userdata
+          - name: tz-config
+            mountPath: /etc/localtime
+            readOnly: true
+
+          volumes:
+          - name: openhab
+            persistentVolumeClaim:
+              claimName: openhab
+          - name: zstick-zwave
+            hostPath:
+              path: /dev/ttyUSB0
+          - name: zstick-zigbee
+            hostPath:
+              path: /dev/ttyUSB1
+          - name: tz-config
+            hostPath:
+              path: /usr/share/zoneinfo/America/Los_Angeles
+              type: File
+
+          configBuilder:
+            configsRepoURL: https://github.com/jamesgoodhouse/openhab-configs.git
+
+            volumeMounts:
+            - name: config-yaml
+              mountPath: /yamls/config
+              readOnly: true
+            - name: secrets-yaml
+              mountPath: /yamls/secrets
+              readOnly: true
+            - name: openhab
+              mountPath: /final_configs
+              subPath: conf
+            - name: openhab
+              mountPath: /configs_repo
+              subPath: conf-repo
+
+            volumes:
+            - name: openhab
+              persistentVolumeClaim:
+                claimName: openhab
+            - name: config-yaml
+              configMap:
+                name: openhab-config
+            - name: secrets-yaml
+              secret:
+                secretName: openhab-secrets
+
+            # envFrom:
+            # - secretRef:
+            #     name: influxdb-auth
+
+          configYaml: |
+            settings:
+              addons:
+                package: minimal
+                binding:
+                - airquality
+                - astro
+                - daikin
+                - mqtt
+                - network
+                - telegram
+                - tplinksmarthome
+                - unifi
+                - zigbee
+                - zwave
+                misc: []
+                persistence:
+                - influxdb
+                transformation:
+                - jsonpath
+                - map
+                ui:
+                - basic
+              ephemeris:
+                country: us
+                region: or
+                dayset:
+                  trash: Friday
+              persistence:
+                influxdb:
+                  db: openhab
+                  url: http://influxdb.data:8086
+              i18n:
+                language: en
+                region: US
+                timezone: US/Pacific
+                measurement_system: US
+            things:
+              airquality:
+                station_id: 86
+              daikin:
+                living_room:
+                  thing_id: living_room
+                  type_id: ac_unit
+                  name: LivingRoom
+                  host: great-room.hvac.home.goodhouse.io
+                  location: Living Room
+                main_bedroom:
+                  thing_id: main_bedroom
+                  type_id: ac_unit
+                  name: MainBedroom
+                  host: main-bedroom.hvac.home.goodhouse.io
+                  location: Main Bedroom
+              unifi:
+                refresh_rate: 10
+                wireless_clients:
+                - id: phone_james
+                  name: James' Phone
+                  consider_home: 60
+                  site: default
+              zigbee:
+                coordinator:
+                  baud_rate: 57600
+                  child_timeout: 86400
+                  concentrator: 1
+                  flow_control: 2 # software (XOn/XOff)
+                  mesh_update_period: 86400
+                  port: /dev/ttyUSB1
+              zwave:
+                controller:
+                  port: /dev/ttyUSB0
+                devices:
+                  tilt_sensor_garage_door:
+                    thing_id: tilt_sensor_garage_door
+                    label: Tilt Sensor
+                    location: Garage
+                    type_id: eco_tiltzwave25_00_000
+                    parameters:
+                    - node_id: 3
+
+- name: Deploy Certificate
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: openhab.home.goodhouse.io
+      spec:
+        dnsNames:
+        - openhab.home.goodhouse.io
+        secretName: openhab.home.goodhouse.io
+        issuerRef:
+          name: letsencrypt
+          kind: ClusterIssuer
+
+- name: Deploy Secret
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: openhab-secrets
+      type: Opaque
+      data:
+        secrets.yaml: "{{ lookup('file', role_path + '/files/secrets.yaml.vault') | b64encode }}"

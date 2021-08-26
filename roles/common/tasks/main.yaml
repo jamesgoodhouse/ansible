@@ -6,3 +6,20 @@
   notify: reload ssh
   tags:
   - ssh
+
+- name: Install common packages
+  apt:
+    pkg:
+    - python3-pip
+    update_cache: true
+  tags:
+  - apt
+
+- name: Install common Python packages via pip
+  pip:
+    name:
+    - openshift
+    - pyyaml
+  tags:
+  - pip
+  - python

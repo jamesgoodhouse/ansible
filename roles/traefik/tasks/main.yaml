@@ -127,3 +127,16 @@
             namespace: "{{ namespace }}"
         tls:
           secretName: "{{ dashboard_host }}"
+
+- name: Deploy Secret for basic auth
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: basicauth-traefik
+      type: Opaque
+      data:
+        users: "{{ users | b64encode }}"

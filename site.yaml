@@ -106,3 +106,9 @@
     - ubiquiti
     - unifi
     - k8s
+  - role: k8s_manifests/fireplacectl
+    vars:
+      namespace: openhab
+    tags:
+    - fireplacectl
+    - k8s

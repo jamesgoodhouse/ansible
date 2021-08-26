@@ -1,0 +1,48 @@
+- name: Deploy Deployment
+  community.kubernetes.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    resource_definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: fireplacectl
+        labels:
+          app: fireplacectl
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate
+        selector:
+          matchLabels:
+            app: fireplacectl
+        template:
+          metadata:
+            labels:
+              app: fireplacectl
+          spec:
+            volumes:
+            - name: gpio
+              hostPath:
+                path: /sys/class/gpio
+                type: Directory
+            - name: gpiomem
+              hostPath:
+                path: /dev/gpiomem
+                type: CharDevice
+
+            containers:
+            - name: fireplacectl
+              image: jgoodhouse/fireplacectl:latest
+              imagePullPolicy: Always
+              securityContext:
+                privileged: true
+              env:
+              - name: MQTT_HOST
+                value: mosquitto.mosquitto
+              - name: MQTT_USERNAME
+                value: rpi
+              - name: MQTT_PASSWORD
+                value: password
+              - name: RELAY_PIN
+                value: '17'

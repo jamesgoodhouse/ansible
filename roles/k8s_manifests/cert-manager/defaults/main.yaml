@@ -1,2 +1,3 @@
 cert_manager_namespace: cert-manager
 cert_manager_state: present
+cert_manager_webhook_namecheap_credential_secret_name: namecheap-credentials

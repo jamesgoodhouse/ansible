@@ -1,0 +1,7 @@
+- name: Create Namespace
+  community.kubernetes.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+  with_items: "{{ namespaces }}"

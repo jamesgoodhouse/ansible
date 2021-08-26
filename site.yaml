@@ -19,8 +19,24 @@
         default-local-storage-path: /opt/k8s
     tags:
     - k3s
+  - role: k8s_manifests/namespaces
+    vars:
+      namespaces:
+      - name: cert-manager
+        state: present
+      - name: mosquitto
+        state: present
+      - name: openhab
+        state: present
+      - name: ubiquiti
+        state: present
+    tags:
+    - namespaces
+    - k8s
   - role: k8s_manifests/cert-manager
     vars:
+      cert_manager_helm_chart_version: v1.5.3
+      cert_manager_state: present
       cert_manager_webhook_namecheap_api_key: !vault |
         $ANSIBLE_VAULT;1.1;AES256
         63343030346133343337343063346630656238323563343465656631326339346335366239353733
@@ -36,13 +52,14 @@
         35633561333131613566356333303532396331303432656238646130613966396166626234653062
         6165323835353061370a626633356532626334303135306363656131633632633339336664336433
         3762
-      cert_manager_state: present
+      cert_manager_webhook_namecheap_helm_chart_version: 0.1.0
     tags:
     - cert-manager
     - k8s
   - role: k8s_manifests/traefik
     vars:
       traefik_dashboard_host: traefik.k8s.home.goodhouse.io
+      traefik_state: present
       traefik_users: !vault |
         $ANSIBLE_VAULT;1.1;AES256
         31613238333466653137613330613565346336373032306133646566316562373735303764326338
@@ -51,7 +68,6 @@
         3339393864316339640a663566623031626238356536333431346266663031633562383461633835
         37366461353138303361376530366439343938383465653439316237666239636139633338626161
         3435636530613135323562383534376235393538383037356261
-      traefik_state: present
     tags:
     - traefik
     - k8s

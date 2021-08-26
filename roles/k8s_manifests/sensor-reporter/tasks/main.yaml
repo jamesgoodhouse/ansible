@@ -1,0 +1,53 @@
+- name: Deploy Secret
+  community.kubernetes.k8s:
+    state: "{{ sensor_reporter_state }}"
+    namespace: "{{ sensor_reporter_namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: sensor-reporter-config
+      type: Opaque
+      data:
+        config.ini: "{{ sensor_reporter_config | b64encode }}"
+
+- name: Deploy Deployment
+  community.kubernetes.k8s:
+    state: "{{ sensor_reporter_state }}"
+    namespace: "{{ sensor_reporter_namespace }}"
+    resource_definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: sensor-reporter
+        namespace: openhab
+        labels:
+          app: sensor-reporter
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate
+        selector:
+          matchLabels:
+            app: sensor-reporter
+        template:
+          metadata:
+            labels:
+              app: sensor-reporter
+          spec:
+            hostNetwork: true # to allow bluetooth access
+            dnsPolicy: ClusterFirstWithHostNet
+            volumes:
+            - name: config
+              secret:
+                secretName: sensor-reporter-config
+            containers:
+            - name: sensor-reporter
+              # image: jgoodhouse/go-bt:latest
+              image: jgoodhouse/rkoshak-sensor-reporter:latest
+              imagePullPolicy: Always
+              securityContext:
+                privileged: true # to allow bluetooth access
+              volumeMounts:
+              - name: config
+                mountPath: /etc/sensor_reporter

@@ -1,10 +1,3 @@
-- name: Create Namespace
-  community.kubernetes.k8s:
-    api_version: v1
-    kind: Namespace
-    name: "{{ openhab_namespace }}"
-    state: "{{ openhab_state }}"
-
 - name: Deploy Helm chart
   community.kubernetes.k8s:
     state: "{{ openhab_state }}"

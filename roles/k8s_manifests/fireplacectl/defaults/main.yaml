@@ -1,1 +1,2 @@
+fireplacectl_namespace: fireplacectl
 fireplacectl_state: present

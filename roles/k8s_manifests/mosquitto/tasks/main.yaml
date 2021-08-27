@@ -126,11 +126,11 @@
       apiVersion: cert-manager.io/v1
       kind: Certificate
       metadata:
-        name: "{{ mosquitto_host }}"
+        name: "{{ mosquitto_host | mandatory }}"
       spec:
         dnsNames:
-        - "{{ mosquitto_host }}"
-        secretName: "{{ mosquitto_host }}"
+        - "{{ mosquitto_host | mandatory }}"
+        secretName: "{{ mosquitto_host | mandatory }}"
         issuerRef:
           name: letsencrypt
           kind: ClusterIssuer
@@ -156,7 +156,7 @@
             namespace: mosquitto
             port: 1883
         tls:
-          secretName: mqtt.home.goodhouse.io
+          secretName: "{{ mosquitto_host | mandatory }}"
 
 - name: Deploy IngressRouteTCP
   community.kubernetes.k8s:

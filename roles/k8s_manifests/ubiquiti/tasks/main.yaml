@@ -14,10 +14,10 @@
         valuesContent: |-
           ingressroute:
             enabled: true
-            host: "{{ ubiquiti_gui_host }}"
+            host: "{{ ubiquiti_gui_host | mandatory }}"
             tls:
               passthrough: true
-              secretName: "{{ ubiquiti_gui_host }}"
+              secretName: "{{ ubiquiti_gui_host | mandatory }}"
           rsync_backup:
             enabled: true
             backup_dir_path: 'Config\ Backups/unifi'
@@ -32,11 +32,11 @@
       apiVersion: cert-manager.io/v1
       kind: Certificate
       metadata:
-        name: "{{ ubiquiti_gui_host }}"
+        name: "{{ ubiquiti_gui_host | mandatory }}"
       spec:
         dnsNames:
-        - "{{ ubiquiti_gui_host }}"
-        secretName: "{{ ubiquiti_gui_host }}"
+        - "{{ ubiquiti_gui_host | mandatory }}"
+        secretName: "{{ ubiquiti_gui_host | mandatory }}"
         issuerRef:
           name: letsencrypt
           kind: ClusterIssuer

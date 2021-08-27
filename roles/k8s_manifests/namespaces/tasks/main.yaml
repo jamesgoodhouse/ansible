@@ -4,4 +4,4 @@
     kind: Namespace
     name: "{{ item.name }}"
     state: "{{ item.state }}"
-  with_items: "{{ namespaces }}"
+  with_items: "{{ namespaces | mandatory }}"

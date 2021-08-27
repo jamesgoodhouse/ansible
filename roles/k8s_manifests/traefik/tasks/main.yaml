@@ -95,11 +95,11 @@
       apiVersion: cert-manager.io/v1
       kind: Certificate
       metadata:
-        name: "{{ traefik_dashboard_host }}"
+        name: "{{ traefik_dashboard_host | mandatory }}"
       spec:
         dnsNames:
-        - "{{ traefik_dashboard_host }}"
-        secretName: "{{ traefik_dashboard_host }}"
+        - "{{ traefik_dashboard_host | mandatory }}"
+        secretName: "{{ traefik_dashboard_host | mandatory }}"
         issuerRef:
           name: letsencrypt
           kind: ClusterIssuer
@@ -117,7 +117,7 @@
         entryPoints:
         - websecure
         routes:
-        - match: "Host(`{{ traefik_dashboard_host }}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+        - match: "Host(`{{ traefik_dashboard_host | mandatory }}`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
           kind: Rule
           services:
           - name: api@internal
@@ -126,7 +126,7 @@
           - name: basicauth-traefik
             namespace: "{{ traefik_namespace }}"
         tls:
-          secretName: "{{ traefik_dashboard_host }}"
+          secretName: "{{ traefik_dashboard_host | mandatory }}"
 
 - name: Deploy Secret for basic auth
   community.kubernetes.k8s:
@@ -139,4 +139,4 @@
         name: basicauth-traefik
       type: Opaque
       data:
-        users: "{{ traefik_users | b64encode }}"
+        users: "{{ (traefik_users | mandatory) | b64encode }}"

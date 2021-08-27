@@ -1,2 +1,3 @@
+mosquitto_passwd: ""
 mosquitto_namespace: mosquitto
 mosquitto_state: present

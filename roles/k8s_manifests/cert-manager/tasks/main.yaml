@@ -11,7 +11,7 @@
       spec:
         chart: cert-manager
         repo: https://charts.jetstack.io
-        version: "{{ cert_manager_helm_chart_version }}"
+        version: "{{ cert_manager_helm_chart_version | mandatory }}"
         valuesContent: |-
           global:
             priorityClassName: system-cluster-critical
@@ -42,7 +42,7 @@
       spec:
         chart: cert-manager-webhook-namecheap
         repo: https://jamesgoodhouse.github.io/cert-manager-webhook-namecheap
-        version: "{{ cert_manager_webhook_namecheap_helm_chart_version }}"
+        version: "{{ cert_manager_webhook_namecheap_helm_chart_version | mandatory }}"
         valuesContent: |-
           priorityClassName: system-cluster-critical
 
@@ -99,8 +99,8 @@
         name: "{{ cert_manager_webhook_namecheap_credential_secret_name }}"
       type: Opaque
       data:
-        apiKey: "{{ cert_manager_webhook_namecheap_api_key | b64encode }}"
-        apiUser: "{{ cert_manager_webhook_namecheap_api_user | b64encode }}"
+        apiKey: "{{ (cert_manager_webhook_namecheap_api_key | mandatory) | b64encode }}"
+        apiUser: "{{ (cert_manager_webhook_namecheap_api_user | mandatory) | b64encode }}"
 
 - name: Deploy Secret for Let's Encrypt Account Key
   community.kubernetes.k8s:

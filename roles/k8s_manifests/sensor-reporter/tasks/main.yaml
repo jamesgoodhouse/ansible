@@ -9,7 +9,7 @@
         name: sensor-reporter-config
       type: Opaque
       data:
-        config.ini: "{{ sensor_reporter_config | b64encode }}"
+        config.ini: "{{ (sensor_reporter_config | mandatory) | b64encode }}"
 
 - name: Deploy Deployment
   community.kubernetes.k8s:

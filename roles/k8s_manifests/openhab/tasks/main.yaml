@@ -229,4 +229,4 @@
         name: openhab-secrets
       type: Opaque
       data:
-        secrets.yaml: "{{ lookup('file', role_path + '/files/secrets.yaml.vault') | b64encode }}"
+        secrets.yaml: "{{ lookup('file', role_path + '/files/secrets.yaml.vault', rstrip=False) | b64encode }}"

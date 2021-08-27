@@ -1,3 +1,4 @@
 ubiquiti_namespace: ubiquiti
 ubiquiti_state: present
 ubiquiti_unifi_helm_chart_name: unifi
+ubiquiti_unifi_backup_schedule: "0 10 * * 6"

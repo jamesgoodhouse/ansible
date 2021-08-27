@@ -22,7 +22,7 @@
             enabled: true
             backup_dir_path: 'Config\ Backups/unifi'
             address: nas.home.goodhouse.io
-            schedule: "*/5 * * * *"
+            schedule: "{{ ubiquiti_unifi_backup_schedule }}"
 
 - name: Deploy Certificate
   community.kubernetes.k8s:

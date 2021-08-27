@@ -176,7 +176,7 @@
           services:
           - kind: Service
             name: mosquitto
-            namespace: data
+            namespace: mosquitto
             port: 1883
 
 - name: Deploy Service

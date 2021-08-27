@@ -6,11 +6,11 @@
       apiVersion: helm.cattle.io/v1
       kind: HelmChart
       metadata:
-        name: unifi
+        name: "{{ ubiquiti_unifi_helm_chart_name }}"
       spec:
-        chart: unifi
+        chart: "{{ ubiquiti_unifi_helm_chart_name }}"
         repo: https://jamesgoodhouse.github.io/helm-charts
-        version: 0.1.20
+        version: 0.1.21
         valuesContent: |-
           ingressroute:
             enabled: true
@@ -20,6 +20,9 @@
               secretName: "{{ ubiquiti_gui_host }}"
           rsync_backup:
             enabled: true
+            backup_dir_path: 'Config\ Backups/unifi'
+            address: nas.home.goodhouse.io
+            schedule: "*/5 * * * *"
 
 - name: Deploy Certificate
   community.kubernetes.k8s:
@@ -30,7 +33,6 @@
       kind: Certificate
       metadata:
         name: "{{ ubiquiti_gui_host }}"
-        namespace: ubiquiti
       spec:
         dnsNames:
         - "{{ ubiquiti_gui_host }}"
@@ -38,3 +40,17 @@
         issuerRef:
           name: letsencrypt
           kind: ClusterIssuer
+
+- name: Deploy Secret for backup job
+  community.kubernetes.k8s:
+    state: "{{ ubiquiti_state }}"
+    namespace: "{{ ubiquiti_namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ ubiquiti_unifi_helm_chart_name }}-ssh"
+      type: Opaque
+      data:
+        id_rsa: "{{ lookup('file', role_path + '/files/id_rsa.vault', rstrip=False) | b64encode }}"
+        known_hosts: "{{ lookup('file', role_path + '/files/known_hosts.vault', rstrip=False) | b64encode }}"

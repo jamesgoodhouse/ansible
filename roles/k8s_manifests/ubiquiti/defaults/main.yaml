@@ -1,2 +1,3 @@
 ubiquiti_namespace: ubiquiti
 ubiquiti_state: present
+ubiquiti_unifi_helm_chart_name: unifi

@@ -145,3 +145,47 @@
             selector:
               dnsZones:
               - home.goodhouse.io
+
+- name: Deploy Secret for Let's Encrypt (staging) account key
+  community.kubernetes.k8s:
+    state: "{{ cert_manager_state }}"
+    namespace: "{{ cert_manager_namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ cert_manager_letsencrypt_staging_account_key_secret_name }}"
+      type: Opaque
+      data:
+        tls.key: "{{ lookup('file', role_path + '/files/letsencrypt_staging_account_key.vault', rstrip=False) | b64encode }}"
+
+- name: Deploy ClusterIssuer for Let's Encrypt (staging)
+  community.kubernetes.k8s:
+    state: "{{ cert_manager_state }}"
+    namespace: "{{ cert_manager_namespace }}"
+    resource_definition:
+      apiVersion: cert-manager.io/v1
+      kind: ClusterIssuer
+      metadata:
+        name: letsencrypt-staging
+      spec:
+        acme:
+          server: https://acme-staging-v02.api.letsencrypt.org/directory
+          disableAccountKeyGeneration: true
+          privateKeySecretRef:
+            name: "{{ cert_manager_letsencrypt_staging_account_key_secret_name }}"
+          solvers:
+          - dns01:
+              webhook:
+                groupName: acme.namecheap.com
+                solverName: namecheap
+                config:
+                  apiKeySecretRef:
+                    key: apiKey
+                    name: "{{ cert_manager_webhook_namecheap_credential_secret_name }}"
+                  apiUserSecretRef:
+                    key: apiUser
+                    name: "{{ cert_manager_webhook_namecheap_credential_secret_name }}"
+            selector:
+              dnsZones:
+              - home.goodhouse.io

@@ -125,6 +125,7 @@
     vars:
       ubiquiti_gui_host: unifi.home.goodhouse.io
       ubiquiti_state: present
+      ubiquiti_unifi_certificate_issuer: letsencrypt-staging
     tags:
     - ubiquiti
     - unifi

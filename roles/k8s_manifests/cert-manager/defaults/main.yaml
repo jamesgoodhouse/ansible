@@ -1,4 +1,5 @@
 cert_manager_letsencrypt_account_key_secret_name: letsencrypt-account-key
+cert_manager_letsencrypt_staging_account_key_secret_name: letsencrypt-staging-account-key
 cert_manager_namespace: cert-manager
 cert_manager_state: present
 cert_manager_webhook_namecheap_credential_secret_name: namecheap-credentials

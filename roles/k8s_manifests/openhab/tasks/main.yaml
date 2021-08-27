@@ -137,8 +137,8 @@
                 - zigbee
                 - zwave
                 misc: []
-                persistence:
-                - influxdb
+                persistence: []
+                # - influxdb
                 transformation:
                 - jsonpath
                 - map
@@ -150,6 +150,7 @@
                 dayset:
                   trash: Friday
               persistence:
+                default: rrdj4
                 influxdb:
                   db: openhab
                   url: http://influxdb.data:8086

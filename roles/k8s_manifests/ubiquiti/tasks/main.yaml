@@ -38,7 +38,7 @@
         - "{{ ubiquiti_gui_host | mandatory }}"
         secretName: "{{ ubiquiti_gui_host | mandatory }}"
         issuerRef:
-          name: letsencrypt
+          name: "{{ ubiquiti_unifi_certificate_issuer }}"
           kind: ClusterIssuer
 
 - name: Deploy Secret for backup job

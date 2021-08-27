@@ -102,6 +102,19 @@
         apiKey: "{{ cert_manager_webhook_namecheap_api_key | b64encode }}"
         apiUser: "{{ cert_manager_webhook_namecheap_api_user | b64encode }}"
 
+- name: Deploy Secret for Let's Encrypt Account Key
+  community.kubernetes.k8s:
+    state: "{{ cert_manager_state }}"
+    namespace: "{{ cert_manager_namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ cert_manager_letsencrypt_account_key_secret_name }}"
+      type: Opaque
+      data:
+        tls.key: "{{ lookup('file', role_path + '/files/letsencrypt_account_key.vault', rstrip=False) | b64encode }}"
+
 - name: Deploy ClusterIssuer for Let's Encrypt
   community.kubernetes.k8s:
     state: "{{ cert_manager_state }}"
@@ -114,8 +127,9 @@
       spec:
         acme:
           server: https://acme-v02.api.letsencrypt.org/directory
+          disableAccountKeyGeneration: true
           privateKeySecretRef:
-            name: letsencrypt-account-key
+            name: "{{ cert_manager_letsencrypt_account_key_secret_name }}"
           solvers:
           - dns01:
               webhook:
@@ -128,3 +142,6 @@
                   apiUserSecretRef:
                     key: apiUser
                     name: "{{ cert_manager_webhook_namecheap_credential_secret_name }}"
+            selector:
+              dnsZones:
+              - home.goodhouse.io

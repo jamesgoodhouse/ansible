@@ -194,6 +194,13 @@
                 controller:
                   port: /dev/ttyUSB0
                 devices:
+                  sensor_garage_door:
+                    thing_id: sensor_garage_door
+                    label: Sensor
+                    location: Garage
+                    type_id: eco_dwzwave25_00_000
+                    parameters:
+                    - node_id: 2
                   tilt_sensor_garage_door:
                     thing_id: tilt_sensor_garage_door
                     label: Tilt Sensor

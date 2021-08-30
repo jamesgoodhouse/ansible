@@ -216,7 +216,7 @@
         - openhab.home.goodhouse.io
         secretName: openhab.home.goodhouse.io
         issuerRef:
-          name: letsencrypt
+          name: "{{ openhab_certificate_issuer }}"
           kind: ClusterIssuer
 
 - name: Deploy Secret

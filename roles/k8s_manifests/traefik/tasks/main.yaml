@@ -101,7 +101,7 @@
         - "{{ traefik_dashboard_host | mandatory }}"
         secretName: "{{ traefik_dashboard_host | mandatory }}"
         issuerRef:
-          name: letsencrypt
+          name: "{{ traefik_certificate_issuer }}"
           kind: ClusterIssuer
 
 - name: Deploy IngressRoute for dashboard

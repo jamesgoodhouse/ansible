@@ -58,6 +58,7 @@
     - k8s
   - role: k8s_manifests/traefik
     vars:
+      traefik_certificate_issuer: letsencrypt
       traefik_dashboard_host: traefik.k8s.home.goodhouse.io
       traefik_state: present
       traefik_users: !vault |
@@ -117,6 +118,7 @@
     - k8s
   - role: k8s_manifests/openhab
     vars:
+      openhab_certificate_issuer: letsencrypt
       openhab_state: present
     tags:
     - openhab
@@ -125,7 +127,7 @@
     vars:
       ubiquiti_gui_host: unifi.home.goodhouse.io
       ubiquiti_state: present
-      ubiquiti_unifi_certificate_issuer: letsencrypt-staging
+      ubiquiti_unifi_certificate_issuer: letsencrypt
     tags:
     - ubiquiti
     - unifi

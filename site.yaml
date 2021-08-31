@@ -119,6 +119,7 @@
   - role: k8s_manifests/openhab
     vars:
       openhab_certificate_issuer: letsencrypt
+      openhab_helm_chart_version: 0.1.4
       openhab_state: present
     tags:
     - openhab

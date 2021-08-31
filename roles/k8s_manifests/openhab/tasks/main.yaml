@@ -10,7 +10,7 @@
       spec:
         chart: openhab
         repo: https://jamesgoodhouse.github.io/helm-charts
-        version: 0.1.0
+        version: "{{ openhab_helm_chart_version | mandatory }}"
         valuesContent: |-
           ingressroute:
             enabled: true

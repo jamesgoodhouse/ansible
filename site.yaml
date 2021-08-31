@@ -2,7 +2,11 @@
 - hosts: rpi
   roles:
   - role: common
+    tags:
+    - common
   - role: rpi
+    tags:
+    - rpi
 
 - hosts: k3s_nodes
   environment:

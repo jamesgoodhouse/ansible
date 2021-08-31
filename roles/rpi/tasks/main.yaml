@@ -16,10 +16,14 @@
   alternatives:
     path: /usr/sbin/iptables-legacy
     name: iptables
-  register: ip4_legacy
 
 - name: Change to ip6tables-legacy
   alternatives:
     path: /usr/sbin/ip6tables-legacy
     name: ip6tables
-  register: ip6_legacy
+
+- name: Disable sudo NOPASSWD for pi user
+  replace:
+    path: /etc/sudoers.d/010_pi-nopasswd
+    regexp: '^(pi .*)$'
+    replace: '# \1'

@@ -91,14 +91,12 @@
 
           configBuilder:
             configsRepoURL: https://github.com/jamesgoodhouse/openhab-configs.git
-
-            env:
-            - name: CONFIG_YAML_PATH
-              value: /configs_repo/config.yaml
+            image:
+              tag: "{{ openhab_config_builder_version }}"
 
             volumeMounts:
-            - name: secrets-yaml
-              mountPath: /yamls/secrets
+            - name: age-key
+              mountPath: /age
               readOnly: true
             - name: openhab
               mountPath: /final_configs
@@ -111,9 +109,9 @@
             - name: openhab
               persistentVolumeClaim:
                 claimName: openhab
-            - name: secrets-yaml
+            - name: age-key
               secret:
-                secretName: openhab-secrets
+                secretName: config-builder-age-key
 
             # envFrom:
             # - secretRef:
@@ -144,7 +142,7 @@
       apiVersion: v1
       kind: Secret
       metadata:
-        name: openhab-secrets
+        name: config-builder-age-key
       type: Opaque
       data:
-        secrets.yaml: "{{ lookup('file', role_path + '/files/secrets.yaml.vault', rstrip=False) | b64encode }}"
+        key.txt: "{{ (openhab_config_builder_age_key | mandatory) | b64encode }}"

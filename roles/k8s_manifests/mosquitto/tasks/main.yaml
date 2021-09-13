@@ -106,7 +106,7 @@
 
             containers:
             - name: mosquitto
-              image: eclipse-mosquitto:2.0
+              image: "eclipse-mosquitto:{{ mosquitto_image_version }}"
               ports:
               - containerPort: 1883
               volumeMounts:

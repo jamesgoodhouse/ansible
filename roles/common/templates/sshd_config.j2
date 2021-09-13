@@ -28,7 +28,7 @@
 
 # Authentication:
 
-#LoginGraceTime 2m
+LoginGraceTime {{ sshd_login_grace_time }}
 PermitRootLogin {{ sshd_permit_root_login }}
 #StrictModes yes
 MaxAuthTries {{ sshd_max_auth_tries }}
@@ -95,7 +95,7 @@ PrintMotd no
 TCPKeepAlive {{ sshd_tcp_keep_alive }}
 #PermitUserEnvironment no
 Compression {{ sshd_compression }}
-#ClientAliveInterval 0
+ClientAliveInterval {{ sshd_client_alive_internal }}
 ClientAliveCountMax {{ sshd_client_alive_count_max }}
 #UseDNS no
 #PidFile /var/run/sshd.pid

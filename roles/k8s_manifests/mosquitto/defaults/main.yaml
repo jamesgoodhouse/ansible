@@ -1,3 +1,4 @@
-mosquitto_passwd: ""
+mosquitto_image_version: 2.0
 mosquitto_namespace: mosquitto
+mosquitto_passwd: ""
 mosquitto_state: present

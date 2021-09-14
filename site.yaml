@@ -25,6 +25,7 @@
         default-local-storage-path: /opt/k8s
     tags:
     - k3s
+
   - role: k8s_manifests/namespaces
     vars:
       namespaces:
@@ -39,6 +40,7 @@
     tags:
     - namespaces
     - k8s
+
   - role: k8s_manifests/cert-manager
     vars:
       cert_manager_helm_chart_version: v1.5.3
@@ -62,6 +64,7 @@
     tags:
     - cert-manager
     - k8s
+
   - role: k8s_manifests/traefik
     vars:
       traefik_certificate_issuer: letsencrypt
@@ -123,6 +126,7 @@
     tags:
     - mosquitto
     - k8s
+
   - role: k8s_manifests/openhab
     vars:
       openhab_certificate_issuer: letsencrypt
@@ -142,6 +146,7 @@
     tags:
     - openhab
     - k8s
+
   - role: k8s_manifests/ubiquiti
     vars:
       ubiquiti_gui_host: unifi.home.goodhouse.io
@@ -151,6 +156,7 @@
     - ubiquiti
     - unifi
     - k8s
+
   - role: k8s_manifests/fireplacectl
     vars:
       fireplacectl_namespace: openhab
@@ -158,6 +164,7 @@
     tags:
     - fireplacectl
     - k8s
+
   - role: k8s_manifests/sensor-reporter
     vars:
       sensor_reporter_config: !vault |

@@ -55,6 +55,13 @@
               mountPath: /final_configs
               subPath: conf
               readOnly: true
+            resources:
+              limits:
+                cpu: 100m
+                memory: 64Mi
+              requests:
+                cpu: 100m
+              memory: 32Mi
 
           volumeMounts:
           - name: zstick-zwave
@@ -89,6 +96,14 @@
               path: /usr/share/zoneinfo/America/Los_Angeles
               type: File
 
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1024Mi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+
           configBuilder:
             configsRepoURL: https://github.com/jamesgoodhouse/openhab-configs.git
             image:
@@ -112,6 +127,14 @@
             - name: age-key
               secret:
                 secretName: config-builder-age-key
+
+            resources:
+              limits:
+                cpu: 100m
+                memory: 64Mi
+              requests:
+                cpu: 100m
+                memory: 32Mi
 
             # envFrom:
             # - secretRef:

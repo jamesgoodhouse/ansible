@@ -23,6 +23,13 @@
             backup_dir_path: 'Config\ Backups/unifi'
             address: nas.home.goodhouse.io
             schedule: "{{ ubiquiti_unifi_backup_schedule }}"
+          resources:
+            limits:
+              cpu: 250m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
 
 - name: Deploy Certificate
   community.kubernetes.k8s:

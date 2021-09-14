@@ -117,6 +117,13 @@
                 mountPath: /mosquitto/config
               - name: passwd
                 mountPath: /etc/mosquitto
+              resources:
+                requests:
+                  memory: 16Mi
+                  cpu: 100m
+                limits:
+                  memory: 32Mi
+                  cpu: 100m
 
 - name: Deploy Certificate
   community.kubernetes.k8s:

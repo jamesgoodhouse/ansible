@@ -72,6 +72,13 @@
               protocol: TCP
               tls:
                 enabled: false
+          resources:
+            requests:
+              cpu: 100m
+              memory: 50Mi
+            limits:
+              cpu: 300m
+              memory: 150Mi
 
 - name: Deploy Middleware for basic auth
   community.kubernetes.k8s:

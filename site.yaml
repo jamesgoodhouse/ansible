@@ -2,6 +2,8 @@
 - hosts: rpi
   roles:
   - role: common
+    vars:
+      sshd_client_alive_internal: 1800
     tags:
     - common
   - role: rpi

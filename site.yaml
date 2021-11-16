@@ -43,7 +43,7 @@
 
   - role: k8s_manifests/cert-manager
     vars:
-      cert_manager_helm_chart_version: v1.5.3
+      cert_manager_helm_chart_version: v1.6.1
       cert_manager_state: present
       cert_manager_webhook_namecheap_api_key: !vault |
         $ANSIBLE_VAULT;1.1;AES256
@@ -85,7 +85,7 @@
   - role: k8s_manifests/mosquitto
     vars:
       mosquitto_host: mqtt.home.goodhouse.io
-      mosquitto_image_version: 2.0.12
+      mosquitto_image_version: 2.0.13
       mosquitto_passwd: !vault |
         $ANSIBLE_VAULT;1.1;AES256
         33323436326665636266326561376262636336623663613137636338666465346137353363643866

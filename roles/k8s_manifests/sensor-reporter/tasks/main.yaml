@@ -43,8 +43,7 @@
                 secretName: sensor-reporter-config
             containers:
             - name: sensor-reporter
-              # image: jgoodhouse/go-bt:latest
-              image: jgoodhouse/rkoshak-sensor-reporter:latest
+              image: "{{ sensor_reporter_image }}:{{ (sensor_reporter_image_tag | mandatory) }}"
               imagePullPolicy: Always
               securityContext:
                 privileged: true # to allow bluetooth access

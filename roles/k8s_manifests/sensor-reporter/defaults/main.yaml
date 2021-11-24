@@ -1,2 +1,3 @@
+sensor_reporter_image: jgoodhouse/rkoshak-sensor-reporter
 sensor_reporter_namespace: sensor-reporter
 sensor_reporter_state: present

@@ -87,7 +87,7 @@
   - role: k8s_manifests/mosquitto
     vars:
       mosquitto_host: mqtt.home.goodhouse.io
-      mosquitto_image_version: 2.0.13
+      mosquitto_image_version: 2.0.14
       mosquitto_passwd: !vault |
         $ANSIBLE_VAULT;1.1;AES256
         33323436326665636266326561376262636336623663613137636338666465346137353363643866
@@ -209,6 +209,8 @@
         66623932623738353962613365393838626436303337313232386639306630623831626239386334
         65393332633431386363373963633466363632366133386336643334623138316232343239663035
         3930386331666432373035306632373233333838666461313066
+      sensor_reporter_image: jgoodhouse/rkoshak-sensor-reporter
+      sensor_reporter_image_tag: '9258689'
       sensor_reporter_namespace: openhab
       sensor_reporter_state: present
     tags:

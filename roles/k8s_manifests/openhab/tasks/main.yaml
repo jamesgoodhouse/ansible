@@ -23,7 +23,7 @@
 
           server:
             settings:
-              extraJavaOpts: "-Duser.timezone=America/Los_Angeles -Dgnu.io.rxtx.SerialPorts=/dev/ttyUSB0:/dev/ttyUSB1"
+              extraJavaOpts: "-Duser.timezone=America/Los_Angeles -Dgnu.io.rxtx.SerialPorts=/dev/ttyUSB0:/dev/ttyUSB1 -Dlog4j2.formatMsgNoLookups=true"
               cryptoPolicy: unlimited
 
           extraEnvironmentVars:

@@ -12,6 +12,9 @@
         repo: https://jamesgoodhouse.github.io/helm-charts
         version: "{{ openhab_helm_chart_version | mandatory }}"
         valuesContent: |-
+          image:
+            tag: 3.1.1
+
           ingressroute:
             enabled: true
             host: openhab.home.goodhouse.io

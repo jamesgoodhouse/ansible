@@ -12,6 +12,8 @@
         repo: https://jamesgoodhouse.github.io/helm-charts
         version: 0.1.21
         valuesContent: |-
+          image:
+            tag: v6.5.55
           ingressroute:
             enabled: true
             host: "{{ ubiquiti_gui_host | mandatory }}"

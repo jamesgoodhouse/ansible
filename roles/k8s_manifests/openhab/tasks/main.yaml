@@ -13,7 +13,7 @@
         version: "{{ openhab_helm_chart_version | mandatory }}"
         valuesContent: |-
           image:
-            tag: 3.1.1
+            tag: "{{ openhab_image_tag }}"
 
           ingressroute:
             enabled: true

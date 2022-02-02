@@ -144,6 +144,7 @@
         62366237303161326366386437303439626336636232383463616430303431643565613631633563
         34346537303366356162
       openhab_helm_chart_version: 0.1.5
+      openhab_image_tag: 3.2.0
       openhab_state: present
     tags:
     - openhab

@@ -1,4 +1,4 @@
 ---
 roles:
 - name: xanmanning.k3s
-  version: v2.11.1
+  version: v3.1.0

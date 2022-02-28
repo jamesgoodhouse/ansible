@@ -141,7 +141,7 @@
   - role: k8s_manifests/openhab
     vars:
       openhab_certificate_issuer: letsencrypt
-      openhab_config_builder_version: v1.2.2
+      openhab_config_builder_version: v1.3.1
       openhab_config_builder_age_key: !vault |
         $ANSIBLE_VAULT;1.1;AES256
         65386362626362646138363565633937333661363661643038373863376635383235623937306131

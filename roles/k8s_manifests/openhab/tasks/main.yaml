@@ -113,7 +113,7 @@
               tag: "{{ openhab_config_builder_version }}"
 
             volumeMounts:
-            - name: age-key
+            - name: sops-age-key
               mountPath: /age
               readOnly: true
             - name: openhab
@@ -127,14 +127,14 @@
             - name: openhab
               persistentVolumeClaim:
                 claimName: openhab
-            - name: age-key
+            - name: sops-age-key
               secret:
-                secretName: config-builder-age-key
+                secretName: config-builder-sops-age-key
 
             resources:
               limits:
                 cpu: 100m
-                memory: 64Mi
+                memory: 32Mi
               requests:
                 cpu: 100m
                 memory: 32Mi
@@ -168,7 +168,7 @@
       apiVersion: v1
       kind: Secret
       metadata:
-        name: config-builder-age-key
+        name: config-builder-sops-age-key
       type: Opaque
       data:
         key.txt: "{{ (openhab_config_builder_age_key | mandatory) | b64encode }}"

@@ -1,0 +1,33 @@
+- name: Deploy Helm chart
+  community.kubernetes.k8s:
+    state: "{{ github_runner_state }}"
+    namespace: "{{ github_runner_namespace }}"
+    resource_definition:
+      apiVersion: helm.cattle.io/v1
+      kind: HelmChart
+      metadata:
+        name: github-runner
+      spec:
+        chart: actions-runner-controller
+        repo: https://actions-runner-controller.github.io/actions-runner-controller
+        version: "{{ github_runner_helm_chart_version }}"
+        valuesContent: |-
+          authSecret:
+            create: true
+            github_token: "{{ github_runner_token | mandatory }}"
+
+- name: Deploy RunnerDeployment
+  community.kubernetes.k8s:
+    state: "{{ github_runner_state }}"
+    namespace: "{{ github_runner_namespace }}"
+    resource_definition:
+      apiVersion: actions.summerwind.dev/v1alpha1
+      kind: RunnerDeployment
+      metadata:
+        name: github-org-runner-goodhouse-io
+      spec:
+        replicas: 1
+        template:
+          spec:
+            dockerEnabled: true
+            organization: "{{ github_runner_organization | mandatory }}"

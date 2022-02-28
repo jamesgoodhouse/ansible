@@ -31,6 +31,8 @@
       namespaces:
       - name: cert-manager
         state: present
+      - name: github-runner
+        state: present
       - name: mosquitto
         state: present
       - name: openhab
@@ -248,4 +250,20 @@
       frontail_state: present
     tags:
     - frontail
+    - k8s
+
+  - role: k8s_manifests/github-runner
+    vars:
+      github_runner_organization: goodhouse-io
+      github_runner_state: present
+      github_runner_token: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        32663865333261653632383366616262663739616261316537633433656633343763316566636134
+        6335373336626563393032663032303231366238386666320a396566626636363264613039336339
+        61396663653666643861393636386164333364663466386232666566323966666338396235623830
+        3962396466636135650a323536643266306635396332373038316537393833373863323239643431
+        65376630353362316139643762353533393834663730633636306639363435663166643633353034
+        3066373534346564363162346161323231383962303964623365
+    tags:
+    - github-runner
     - k8s

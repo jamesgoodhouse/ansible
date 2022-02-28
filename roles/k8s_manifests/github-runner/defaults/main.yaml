@@ -1,0 +1,6 @@
+github_runner_helm_chart_version: 0.16.1
+# github_runner_image_repository: summerwind/actions-runner-controller
+# github_runner_image_tag: v0.20.3
+# github_runner_image_actions_runner_repo_and_tag: summerwind/actions-runner:latest
+github_runner_namespace: github-runner
+github_runner_state: present

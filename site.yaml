@@ -214,7 +214,7 @@
       sensor_reporter_image: jgoodhouse/rkoshak-sensor-reporter
       sensor_reporter_image_tag: '9258689'
       sensor_reporter_namespace: openhab
-      sensor_reporter_state: present
+      sensor_reporter_state: absent
     tags:
     - sensor-reporter
     - k8s

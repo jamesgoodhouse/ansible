@@ -1,5 +1,5 @@
 - name: Deploy ConfigMap
-  community.kubernetes.k8s:
+  kubernetes.core.k8s:
     state: "{{ frontail_state }}"
     namespace: "{{ frontail_namespace }}"
     resource_definition:
@@ -19,8 +19,8 @@
           }
         openhab.json: |
           {
-            "lines": {
-              "openhab.event": "color: #2196F3;"
+            "words": {
+              " [ERROR] ": "color: #E64A19;"
             }
           }
 
@@ -54,17 +54,71 @@
             - name: conf
               configMap:
                 name: frontail-conf
+
             containers:
-            - name: frontail
+            - name: audit
               image: "{{ frontail_image }}:{{ frontail_image_tag }}"
               args:
               - --disable-usage-stats
+              - --port=9001
               - --theme=dark
               - --ui-highlight
               - --ui-highlight-preset=preset/default.json
               - --ui-highlight-preset=preset/openhab.json
-              - --url-path=/logs
-              - /openhab/userdata/logs/*.log
+              - --url-path=/logs/audit
+              - /openhab/userdata/logs/audit.log
+              resources:
+                requests:
+                  memory: 64Mi
+                  cpu: 100m
+                limits:
+                  memory: 64Mi
+                  cpu: 100m
+              volumeMounts:
+              - name: conf
+                mountPath: /frontail/preset
+              - name: openhab
+                mountPath: /openhab/userdata
+                subPath: userdata
+
+            - name: events
+              image: "{{ frontail_image }}:{{ frontail_image_tag }}"
+              args:
+              - --disable-usage-stats
+              - --number=25
+              - --port=9002
+              - --theme=dark
+              - --ui-highlight
+              - --ui-highlight-preset=preset/default.json
+              - --ui-highlight-preset=preset/openhab.json
+              - --url-path=/logs/events
+              - /openhab/userdata/logs/events.log
+              resources:
+                requests:
+                  memory: 64Mi
+                  cpu: 100m
+                limits:
+                  memory: 64Mi
+                  cpu: 100m
+              volumeMounts:
+              - name: conf
+                mountPath: /frontail/preset
+              - name: openhab
+                mountPath: /openhab/userdata
+                subPath: userdata
+
+            - name: openhab
+              image: "{{ frontail_image }}:{{ frontail_image_tag }}"
+              args:
+              - --disable-usage-stats
+              - --number=25
+              - --port=9003
+              - --theme=dark
+              - --ui-highlight
+              - --ui-highlight-preset=preset/default.json
+              - --ui-highlight-preset=preset/openhab.json
+              - --url-path=/logs/openhab
+              - /openhab/userdata/logs/openhab.log
               resources:
                 requests:
                   memory: 64Mi
@@ -96,7 +150,15 @@
         - port: 9001
           targetPort: 9001
           protocol: TCP
-          name: http
+          name: audit
+        - port: 9002
+          targetPort: 9002
+          protocol: TCP
+          name: events
+        - port: 9003
+          targetPort: 9003
+          protocol: TCP
+          name: openhab
         selector:
           app: frontail
 
@@ -116,11 +178,25 @@
         - websecure
         routes:
         - kind: Rule
-          match: Host(`openhab.home.goodhouse.io`) && PathPrefix(`/logs`)
+          match: Host(`openhab.home.goodhouse.io`) && PathPrefix(`/logs/audit`)
           services:
           - kind: Service
             name: frontail
             namespace: "{{ frontail_namespace }}"
             port: 9001
+        - kind: Rule
+          match: Host(`openhab.home.goodhouse.io`) && PathPrefix(`/logs/events`)
+          services:
+          - kind: Service
+            name: frontail
+            namespace: "{{ frontail_namespace }}"
+            port: 9002
+        - kind: Rule
+          match: Host(`openhab.home.goodhouse.io`) && PathPrefix(`/logs/openhab`)
+          services:
+          - kind: Service
+            name: frontail
+            namespace: "{{ frontail_namespace }}"
+            port: 9003
         tls:
           secretName: openhab.home.goodhouse.io

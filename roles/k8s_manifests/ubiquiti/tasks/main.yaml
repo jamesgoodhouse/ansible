@@ -10,10 +10,11 @@
       spec:
         chart: "{{ ubiquiti_unifi_helm_chart_name }}"
         repo: https://jamesgoodhouse.github.io/helm-charts
-        version: 0.1.21
+        version: 0.1.25
         valuesContent: |-
           image:
             tag: v6.5.55
+          logToStdout: 'true'
           ingressroute:
             enabled: true
             host: "{{ ubiquiti_gui_host | mandatory }}"

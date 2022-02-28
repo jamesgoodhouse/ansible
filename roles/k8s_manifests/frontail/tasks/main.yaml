@@ -1,0 +1,126 @@
+- name: Deploy ConfigMap
+  community.kubernetes.k8s:
+    state: "{{ frontail_state }}"
+    namespace: "{{ frontail_namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: frontail-conf
+      data:
+        default.json: |
+          {
+            "words": {
+              "err": "color: #E64A19;"
+            },
+            "lines": {
+              "err": "font-weight: bold;"
+            }
+          }
+        openhab.json: |
+          {
+            "lines": {
+              "openhab.event": "color: #2196F3;"
+            }
+          }
+
+- name: Deploy Deployment
+  kubernetes.core.k8s:
+    state: "{{ frontail_state }}"
+    namespace: "{{ frontail_namespace }}"
+    resource_definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: frontail
+        labels:
+          app: frontail
+      spec:
+        replicas: 1
+        strategy:
+          type: Recreate
+        selector:
+          matchLabels:
+            app: frontail
+        template:
+          metadata:
+            labels:
+              app: frontail
+          spec:
+            volumes:
+            - name: openhab
+              persistentVolumeClaim:
+                claimName: openhab
+            - name: conf
+              configMap:
+                name: frontail-conf
+            containers:
+            - name: frontail
+              image: "{{ frontail_image }}:{{ frontail_image_tag }}"
+              args:
+              - --disable-usage-stats
+              - --theme=dark
+              - --ui-highlight
+              - --ui-highlight-preset=preset/default.json
+              - --ui-highlight-preset=preset/openhab.json
+              - --url-path=/logs
+              - /openhab/userdata/logs/*.log
+              resources:
+                requests:
+                  memory: 64Mi
+                  cpu: 100m
+                limits:
+                  memory: 64Mi
+                  cpu: 100m
+              volumeMounts:
+              - name: conf
+                mountPath: /frontail/preset
+              - name: openhab
+                mountPath: /openhab/userdata
+                subPath: userdata
+
+- name: Deploy Service
+  kubernetes.core.k8s:
+    state: "{{ frontail_state }}"
+    namespace: "{{ frontail_namespace }}"
+    resource_definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: frontail
+        labels:
+          app: frontail
+      spec:
+        type: ClusterIP
+        ports:
+        - port: 9001
+          targetPort: 9001
+          protocol: TCP
+          name: http
+        selector:
+          app: frontail
+
+- name: Deploy IngressRoute
+  kubernetes.core.k8s:
+    state: "{{ frontail_state }}"
+    namespace: "{{ frontail_namespace }}"
+    resource_definition:
+      apiVersion: traefik.containo.us/v1alpha1
+      kind: IngressRoute
+      metadata:
+        name: frontail
+        labels:
+          app: frontail
+      spec:
+        entryPoints:
+        - websecure
+        routes:
+        - kind: Rule
+          match: Host(`openhab.home.goodhouse.io`) && PathPrefix(`/logs`)
+          services:
+          - kind: Service
+            name: frontail
+            namespace: "{{ frontail_namespace }}"
+            port: 9001
+        tls:
+          secretName: openhab.home.goodhouse.io

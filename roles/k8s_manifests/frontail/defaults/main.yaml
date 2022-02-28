@@ -1,0 +1,4 @@
+frontail_image: mthenw/frontail
+frontail_image_tag: 4.9.2
+frontail_namespace: frontail
+frontail_state: present

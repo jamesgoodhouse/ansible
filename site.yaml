@@ -239,3 +239,13 @@
     tags:
     - prometheus
     - k8s
+
+  - role: k8s_manifests/frontail
+    vars:
+      frontail_image: jgoodhouse/frontail
+      frontail_image_tag: v4.9.2
+      frontail_namespace: openhab
+      frontail_state: present
+    tags:
+    - frontail
+    - k8s

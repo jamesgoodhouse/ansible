@@ -1,8 +1,8 @@
 ---
-- name: Configure /etc/ssh/sshd_config
+- name: Add /etc/ssh/sshd_config.d/10-settings.conf
   template:
-    src: sshd_config.j2
-    dest: /etc/ssh/sshd_config
+    src: settings.conf.j2
+    dest: /etc/ssh/sshd_config.d/10-settings.conf
   notify: reload ssh
   tags:
   - ssh

@@ -1,8 +1,8 @@
 sshd_allow_agent_forwarding: 'no'
 sshd_allow_tcp_forwarding: 'no'
 sshd_challenge_response_authentication: 'no'
-sshd_client_alive_internal: 300
 sshd_client_alive_count_max: 0
+sshd_client_alive_internal: 300
 sshd_compression: delayed
 sshd_login_grace_time: 60
 sshd_max_auth_tries: 6
